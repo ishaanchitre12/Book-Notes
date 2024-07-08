@@ -15,9 +15,21 @@
 
     <!-- Once button is clicked, function handler is called passing in id of the book  -->
     <!-- The handler enables the create button and passes id to the value of hidden input -->
+    <% if (locals.bookInfos) { %>
+        <% locals.bookInfos.forEach(book => { %>
+            <button id="<%=book.id%>" class="book-cover" onclick="handler('<%=book.id%>')"><img src="<%=book.imageLink%>"></button>
+        <% }); %>
+    <% } %>
     <form action="/select" method="POST">
-        <input type="hidden" id="hidden" value="">
-        <button class="book-cover" type="submit"><img src="http://books.google.com/books/content?id=czbTCwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"></button>
+        <input type="hidden" name="selectedBookId" id="hidden" value="">
+        <button id="disabled" type="submit" hidden>Select</button>
     </form>
+
+    <script>
+        function handler(id) {
+            document.getElementById("hidden").setAttribute("value", id);
+            document.getElementById("disabled").removeAttribute("hidden");
+        }
+    </script>
 </body>
 </html>
