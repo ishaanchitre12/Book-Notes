@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Book</title>
+</head>
+<body>
+    <h1>New Book</h1>
+    <form action="/add" method="POST">
+        <label for="newBook">Enter the title of the book:</label>
+        <input type="text" name="newBook" required>
+        <button type="submit">Submit</button>
+    </form>
+
+    <!-- Once button is clicked, function handler is called passing in id of the book  -->
+    <!-- The handler enables the create button and passes id to the value of hidden input -->
+    <form action="/select" method="POST">
+        <input type="hidden" id="hidden" value="">
+        <button class="book-cover" type="submit"><img src="http://books.google.com/books/content?id=czbTCwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"></button>
+    </form>
+</body>
+</html>
