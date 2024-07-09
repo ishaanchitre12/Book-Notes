@@ -8,6 +8,18 @@
 </head>
 <body>
     <h1>Book Notes</h1>
+    <% if (locals.bookData) { %>
+        <div class="container">
+            <% bookData.forEach(book => { %>
+                <div class="bookEntry">
+                    <img class="book-cover-image" src="<%= book.imageLink %>">
+                    <h3 class="book-title"><%= book.title %></h3>
+                    <h4 class="book-author"><%= book.author %></h4>
+                    <p class="book-description"><%= book.description %></p>
+                </div>
+            <% }); %>
+        </div>
+    <% } %>
     <form action="/new" method="GET">
         <button type="submit">Add Book</button>
     </form>

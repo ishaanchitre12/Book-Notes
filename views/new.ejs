@@ -17,17 +17,23 @@
     <!-- The handler enables the create button and passes id to the value of hidden input -->
     <% if (locals.bookInfos) { %>
         <% locals.bookInfos.forEach(book => { %>
-            <button id="<%=book.id%>" class="book-cover" onclick="handler('<%=book.id%>')"><img src="<%=book.imageLink%>"></button>
+            <button id="<%=book.id%>" class="book-cover-button" onclick="handler('<%=book.id%>', '<%=book.title%>', '<%=book.author%>', '<%=book.description%>')"><img src="<%=book.imageLink%>"></button>
         <% }); %>
     <% } %>
+    <h2></h2>
+    <h3></h3>
+    <p></p>
     <form action="/select" method="POST">
         <input type="hidden" name="selectedBookId" id="hidden" value="">
         <button id="disabled" type="submit" hidden>Select</button>
     </form>
 
     <script>
-        function handler(id) {
+        function handler(id, title, author, description) {
             document.getElementById("hidden").setAttribute("value", id);
+            document.querySelector("h2").innerHTML = title;
+            document.querySelector("h3").innerHTML = "By: " + author;
+            document.querySelector("p").innerHTML = description;
             document.getElementById("disabled").removeAttribute("hidden");
         }
     </script>
