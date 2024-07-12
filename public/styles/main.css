@@ -1,9 +1,19 @@
-.container {
+.book-entry-container {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
 }
 
+.book-notes-container {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+}
+
 .book-cover-image {
     float: left;
+}
+
+#notes {
+    padding: 0 0 400px 0;
 }

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes</title>
+    <link rel="stylesheet" href="/styles/main.css">
+</head>
+<body>
+    <h1>Add Your Notes</h1>
+    <img src="<%=book.imageLink%>">
+    <form class="book-notes-container" action="/new-note" method="POST">
+        <input type="hidden" name="id" value="<%=book.id%>">
+        <label for="dateRead">Date Read:</label>
+        <input type="date" name="dateRead" required>
+        <label for="rating">Rating:</label>
+        <input type="number" name="rating" min="1" max="10" required>
+        <label for="notes">Notes:</label>
+        <input id="notes" type="text" name="notes" required>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

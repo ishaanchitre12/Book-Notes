@@ -20,9 +20,9 @@
             <button id="<%=book.id%>" class="book-cover-button" onclick="handler('<%=book.id%>', '<%=book.title%>', '<%=book.author%>', '<%=book.description%>')"><img src="<%=book.imageLink%>"></button>
         <% }); %>
     <% } %>
-    <h2></h2>
-    <h3></h3>
-    <p></p>
+    <h2 class="title"></h2>
+    <h3 class="author"></h3>
+    <p class="description"></p>
     <form action="/select" method="POST">
         <input type="hidden" name="selectedBookId" id="hidden" value="">
         <button id="disabled" type="submit" hidden>Select</button>
