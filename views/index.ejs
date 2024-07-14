@@ -16,9 +16,13 @@
                 <h4 class="book-author"><%= book.author %></h4>
                 <p class="book-description"><%= book.description %></p>
             </div>
-            <form action="/notes" method="POST">
+            <form method="POST">
                 <input type="hidden" name="selectedBookId" value="<%=book.id%>">
-                <button type="submit">Add Notes</button>
+                <input type="submit" value="Add New Note" formaction="/notes">
+                <% const note = notesData.find(n => n.bookId == book.id)
+                if (note) { %>
+                    <input type="submit" value="Edit Note" formaction="/edit">
+                <% } %>
             </form>
         <% }); %>
     </div>

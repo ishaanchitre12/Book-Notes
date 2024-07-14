@@ -11,13 +11,45 @@
     <img src="<%=book.imageLink%>">
     <form class="book-notes-container" action="/new-note" method="POST">
         <input type="hidden" name="id" value="<%=book.id%>">
-        <label for="dateRead">Date Read:</label>
-        <input type="date" name="dateRead" required>
-        <label for="rating">Rating:</label>
-        <input type="number" name="rating" min="1" max="10" required>
+        <% const review = reviews.find(r => r.bookId == book.id);
+        if (!review) { %>
+            <div class="finished-attributes">
+                <div class="finished-checkbox">
+                    <input type="checkbox" id="checkbox" name="finished" value="Finished" onchange="toggleFinished()">
+                    <label for="finished">Finished?</label>
+                </div>
+                <div class="rating">
+                    <label id="rating-label" for="rating" hidden>Rating:</label>
+                    <input id="rating-input" type="number" name="rating" min="1" max="10" hidden>
+                </div>
+                <div class="date-finished">
+                    <label id="date-finished-label" for="dateFinished" hidden>Date Finished:</label>
+                    <input id="date-finished-input" type="date" name="dateFinished" hidden>
+                </div>
+            </div>
+        <% } %>
+        <label for="noteDate">Date:</label>
+        <input type="date" name="noteDate" required>
         <label for="notes">Notes:</label>
-        <input id="notes" type="text" name="notes" required>
+        <textarea id="notes" name="notes" wrap="soft" required></textarea>
         <button type="submit">Submit</button>
     </form>
+
+    <script>
+        function toggleFinished() {
+            let toggleValue = document.getElementById("rating-label").hasAttribute("hidden");
+            if (toggleValue) {
+                document.getElementById("rating-label").removeAttribute("hidden");
+                document.getElementById("rating-input").removeAttribute("hidden");
+                document.getElementById("date-finished-label").removeAttribute("hidden");
+                document.getElementById("date-finished-input").removeAttribute("hidden");
+            } else {
+                document.getElementById("rating-label").setAttribute("hidden", true);
+                document.getElementById("rating-input").setAttribute("hidden", true);
+                document.getElementById("date-finished-label").setAttribute("hidden", true);
+                document.getElementById("date-finished-input").setAttribute("hidden", true);
+            }
+        }
+    </script>
 </body>
 </html>

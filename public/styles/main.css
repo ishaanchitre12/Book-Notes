@@ -10,10 +10,41 @@
     width: 50%;
 }
 
+.edit-container {
+    display: flex;
+    justify-content: space-between;
+    margin: 40px 0px;
+}
+
+.hidden-container {
+    display: none;
+}
+
 .book-cover-image {
     float: left;
 }
 
+.finished-attributes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 50px 0px;
+}
+
+.edit-reviews-attributes {
+    margin: 0px 0px;
+}
+
+.icon {
+    background-color: white;
+    border-radius: 50%;
+    border: none;
+}
+
+.icon:hover {
+    background-color: ghostwhite;
+}
+
 #notes {
-    padding: 0 0 400px 0;
+    padding: 5px 5px 400px 5px;
 }

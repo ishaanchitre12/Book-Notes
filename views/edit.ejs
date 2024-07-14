@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit</title>
+    <link rel="stylesheet" href="/styles/main.css">
+</head>
+<body>
+    <h1>Edit Notes</h1>
+    <% const review = reviews.find(r => notes[0].book_id == r.bookId);
+    if (review) { %>
+        <div id="original-review" class="edit-container">
+            <div class="edit-reviews-attributes">
+                <p>Finished on: <%=review.dateFinished%></p>
+                <p>Rating: <%=review.rating%></p>
+            </div>
+            <button class="icon" onclick="editReviewStart()"><img src="/assets/icons/pencil-edit-button-svgrepo-com.svg"></button>
+        </div>
+        <form action="/edit-review" id="edited-review" class="edit-container hidden-container" method="POST">
+            <div class="finished-attributes edit-reviews-attributes">
+                <div class="finished-checkbox">
+                    <input type="checkbox" id="checkbox" name="finished" value="Finished" onchange="toggleFinished()">
+                    <label for="finished">Finished?</label>
+                </div>
+                <div class="rating">
+                    <label id="rating-label" for="rating">Rating:</label>
+                    <input id="rating-input" type="number" name="rating" min="1" max="10" value="<%=review.rating%>">
+                </div>
+                <div class="date-finished">
+                    <label id="date-finished-label" for="dateFinished">Date Finished:</label>
+                    <input id="date-finished-input" type="date" name="dateFinished">
+                </div>
+            </div>
+            <button type="submit" class="icon"><img src="/assets/icons/check-mark-svgrepo-com.svg"></button>
+        </form>
+    <% } %>
+    <div class="edit-container">
+        <% notes.forEach(note => { %>
+            <div class="edit-notes-attributes">
+                <p><%=note.note_date%></p>
+                <p><%=note.notes%></p>
+            </div>
+            <button class="icon"><img src="/assets/icons/pencil-edit-button-svgrepo-com.svg"></button>
+        <% }); %>
+    </div>
+    
+    <script>
+        function editReviewStart() {
+            document.querySelector("#edited-review").classList.remove("hidden-container");
+            document.querySelector("#original-review").classList.add("hidden-container");
+            document.getElementById("checkbox").checked = true;
+        }
+
+        function toggleFinished() {
+            let toggleValue = document.getElementById("rating-label").hasAttribute("hidden");
+            if (toggleValue) {
+                document.getElementById("rating-label").removeAttribute("hidden");
+                document.getElementById("rating-input").removeAttribute("hidden");
+                document.getElementById("date-finished-label").removeAttribute("hidden");
+                document.getElementById("date-finished-input").removeAttribute("hidden");
+            } else {
+                document.getElementById("rating-label").setAttribute("hidden", true);
+                document.getElementById("rating-input").setAttribute("hidden", true);
+                document.getElementById("date-finished-label").setAttribute("hidden", true);
+                document.getElementById("date-finished-input").setAttribute("hidden", true);
+            }
+        }
+    </script>
+</body>
+</html>
