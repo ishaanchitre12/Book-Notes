@@ -17,7 +17,7 @@
             </div>
             <button class="icon" onclick="editReviewStart()"><img src="/assets/icons/pencil-edit-button-svgrepo-com.svg"></button>
         </div>
-        <form action="/edit-review" id="edited-review" class="edit-container hidden-container" method="POST">
+        <form id="edited-review" class="edit-container hidden-container" method="POST">
             <div class="finished-attributes edit-reviews-attributes">
                 <div class="finished-checkbox">
                     <input type="checkbox" id="checkbox" name="finished" value="Finished" onchange="toggleFinished()">
@@ -31,25 +31,44 @@
                     <label id="date-finished-label" for="dateFinished">Date Finished:</label>
                     <input id="date-finished-input" type="date" name="dateFinished">
                 </div>
+                <input type="hidden" name="bookId" value="<%=review.bookId%>">
             </div>
-            <button type="submit" class="icon"><img src="/assets/icons/check-mark-svgrepo-com.svg"></button>
+            <button type="submit" class="icon" formaction="/edit-review">
+                <img src="/assets/icons/check-mark-svgrepo-com.svg"></button>
         </form>
     <% } %>
-    <div class="edit-container">
-        <% notes.forEach(note => { %>
+    
+    <% notes.forEach(note => { %>
+        <div id="original-note-<%=note.id%>" class="edit-container">
             <div class="edit-notes-attributes">
                 <p><%=note.note_date%></p>
                 <p><%=note.notes%></p>
             </div>
-            <button class="icon"><img src="/assets/icons/pencil-edit-button-svgrepo-com.svg"></button>
-        <% }); %>
-    </div>
+            <button class="icon" onclick="editNotesStart('<%=note.id%>')"><img src="/assets/icons/pencil-edit-button-svgrepo-com.svg"></button>
+        </div>
+        <form id="edited-note-<%=note.id%>" action="/edit-notes" class="edit-container hidden-container" method="POST">
+            <div class="book-notes-container">
+                <input type="hidden" name="id" value="<%=note.id%>">
+                <label for="noteDate">Date:</label>
+                <input type="date" name="noteDate" required>
+                <label for="notes">Notes:</label>
+                <textarea name="notes" wrap="soft" rows="30" required><%=note.notes%></textarea>
+            </div>
+            <button type="submit" class="icon"><img src="/assets/icons/check-mark-svgrepo-com.svg"></button>
+        </form>
+    <% }); %>
+    
     
     <script>
         function editReviewStart() {
             document.querySelector("#edited-review").classList.remove("hidden-container");
             document.querySelector("#original-review").classList.add("hidden-container");
             document.getElementById("checkbox").checked = true;
+        }
+
+        function editNotesStart(id) {
+            document.querySelector("#edited-note-" + id).classList.remove("hidden-container");
+            document.querySelector("#original-note-" + id).classList.add("hidden-container");
         }
 
         function toggleFinished() {

@@ -52,6 +52,9 @@ existingReviews.rows.forEach(review => {
     });
 });
 app.get("/", (req, res) => {
+    console.log(books);
+    console.log(notes);
+    console.log(reviews);
     res.render("index.ejs", {bookData: books, notesData: notes});
 });
 
@@ -60,22 +63,54 @@ app.get("/new", (req, res) => {
     res.render("new.ejs", {bookInfos: fivePossibleBooks});
 });
 
-app.post("/notes", (req, res) => {
-    const selectedBook = books.find(b => b.id == req.body.selectedBookId);
+app.get("/notes", (req, res) => {
+    const selectedBook = books.find(b => b.id == req.query.selectedBookId);
     res.render("notes.ejs", {book: selectedBook, reviews: reviews});
 });
 
-app.post("/edit", async (req, res) => {
-    console.log(req.body.selectedBookId);
+app.get("/edit", async (req, res) => {
+    const selectedBookId = req.query.selectedBookId;
     const selectedBookNotes = await db.query("select * from notesdata\
-        where book_id = $1", [req.body.selectedBookId]);
+        where book_id = $1", [selectedBookId]);
     console.log(selectedBookNotes.rows);
     res.render("edit.ejs", {notes: selectedBookNotes.rows, reviews: reviews});
 });
 
 app.post("/edit-review", async (req, res) => {
-    
-})
+    console.log(req.body);
+    const index = reviews.findIndex(r => r.bookId == req.body.bookId);
+    if (req.body.finished) {
+        const result = await db.query("update reviews\
+            set rating = $1,\
+            date_finished = $2\
+            where book_id = $3\
+            returning id", [req.body.rating, req.body.dateFinished, req.body.bookId]);
+
+        reviews[index] = {
+            id: result.rows.id,
+            dateFinished: req.body.dateFinished,
+            rating: req.body.rating,
+            bookId: req.body.bookId
+        };
+    } else {
+        await db.query("delete from reviews where book_id = $1", [req.body.bookId]);
+        reviews.splice(index, 1);
+    }
+    console.log(reviews);
+    res.redirect(`/edit?selectedBookId=${req.body.bookId}`);
+});
+
+app.post("/edit-notes", async (req, res) => {
+    await db.query("update notesdata\
+        set note_date = $1,\
+        notes = $2\
+        where id = $3", [req.body.noteDate, req.body.notes, req.body.id]);
+    const index = notes.findIndex(n => n.id == req.body.id);
+    notes[index].id = parseInt(req.body.id);
+    notes[index].noteDate = req.body.noteDate;
+    notes[index].notes = req.body.notes;
+    res.redirect(`/edit?selectedBookId=${notes[index].bookId}`);
+});
 
 app.post("/new-note", async (req, res) => {
     console.log(req.body);

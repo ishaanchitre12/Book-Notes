@@ -39,12 +39,9 @@
     background-color: white;
     border-radius: 50%;
     border: none;
+    align-self: start;
 }
 
 .icon:hover {
     background-color: ghostwhite;
-}
-
-#notes {
-    padding: 5px 5px 400px 5px;
 }
