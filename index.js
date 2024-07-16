@@ -72,8 +72,13 @@ app.get("/edit", async (req, res) => {
     const selectedBookId = req.query.selectedBookId;
     const selectedBookNotes = await db.query("select * from notesdata\
         where book_id = $1", [selectedBookId]);
+    const selectedBookImageLink = books.find(b => b.id == selectedBookId).imageLink;
     console.log(selectedBookNotes.rows);
-    res.render("edit.ejs", {notes: selectedBookNotes.rows, reviews: reviews});
+    res.render("edit.ejs", {
+        notes: selectedBookNotes.rows, 
+        reviews: reviews,
+        cover: selectedBookImageLink
+    });
 });
 
 app.post("/edit-review", async (req, res) => {

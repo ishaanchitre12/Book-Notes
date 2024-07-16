@@ -1,3 +1,11 @@
+h3 {
+    margin-top: 0px;
+}
+
+p {
+    margin-top: 0px;
+}
+
 .book-entry-container {
     display: flex;
     flex-direction: row;
@@ -12,16 +20,28 @@
 
 .edit-container {
     display: flex;
-    justify-content: space-between;
-    margin: 40px 0px;
+    margin-bottom: 40px;
+}
+
+.empty-div {
+    width: 70%;
 }
 
 .hidden-container {
     display: none;
 }
 
+.home-page-buttons {
+    margin-bottom: 15px;
+}
+
+.notes-form {
+    clear: left;
+}
+
 .book-cover-image {
     float: left;
+    margin: 0px 15px 15px 0px;
 }
 
 .finished-attributes {
