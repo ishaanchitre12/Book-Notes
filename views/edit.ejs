@@ -9,79 +9,143 @@
 <body>
     <h1>Edit Notes</h1>
     <img class="book-cover-image" src="<%=cover%>">
-    <% const review = reviews.find(r => notes[0].book_id == r.bookId);
-    if (review) { %>
-        <div id="original-review" class="edit-container">
-            <div class="edit-reviews-attributes">
-                <p>Finished on: <%=review.dateFinished%></p>
-                <p>Rating: <%=review.rating%></p>
-            </div>
-            <div class="empty-div"></div>
-            <button class="icon" onclick="editReviewStart()"><img src="/assets/icons/pencil-edit-button-svgrepo-com.svg"></button>
-            <button class="icon"><img src="/assets/icons/delete-button-svgrepo-com.svg"></button>
-        </div>
-        <form id="edited-review" class="edit-container hidden-container" method="POST">
-            <div class="finished-attributes edit-reviews-attributes">
-                <div class="finished-checkbox">
-                    <input type="checkbox" id="checkbox" name="finished" value="Finished" onchange="toggleFinished()">
-                    <label for="finished">Finished?</label>
+    <% const review = reviews.find(r => notes[0].book_id == r.bookId); %>
+    <form method="POST">
+        <% const bookId = review ? review.bookId : notes[0].book_id; %>
+        <input type="hidden" name="bookId" value="<%=bookId%>"> 
+        <% if (review) { %>
+            <input type="checkbox" id="in-progress-review" name="inProgressReview" hidden>
+            <div id="original-review" class="edit-container">
+                <div class="edit-reviews-attributes">
+                    <p>Finished on: <%=review.dateFinished.toISOString().substr(0, 10)%></p>
+                    <p>Rating: <%=review.rating%></p>
                 </div>
-                <div class="rating">
-                    <label id="rating-label" for="rating">Rating:</label>
-                    <input id="rating-input" type="number" name="rating" min="1" max="10" value="<%=review.rating%>">
+                <div class="empty-div"></div>
+                <button type="button" class="icon" onclick="editReviewStart()"><img src="/assets/icons/pencil-edit-button-svgrepo-com.svg"></button>
+                <button type="submit" class="icon" formaction="/delete-review">
+                    <img src="/assets/icons/delete-button-svgrepo-com.svg"></button>
+            </div>
+            <div id="edited-review" class="edit-container hidden-container">
+                <div class="finished-attributes edit-reviews-attributes">
+                    <div class="finished-checkbox">
+                        <input type="checkbox" id="checkbox" name="finished" value="Finished" onchange="toggleFinished()">
+                        <label for="finished">Finished?</label>
+                    </div>
+                    <div class="rating">
+                        <label id="rating-label" for="rating">Rating:</label>
+                        <input id="rating-input" type="number" name="rating" min="1" max="10" value="<%=review.rating%>">
+                    </div>
+                    <div class="date-finished">
+                        <label id="date-finished-label" for="dateFinished">Date Finished:</label>
+                        <input id="date-finished-input" type="date" name="dateFinished" value="<%=review.dateFinished.toISOString().substr(0, 10)%>">
+                    </div>
+                    <button type="submit" onclick="cancelReviewForm()" formaction="/cancel-review-progress">Cancel</button>
                 </div>
-                <div class="date-finished">
-                    <label id="date-finished-label" for="dateFinished">Date Finished:</label>
-                    <input id="date-finished-input" type="date" name="dateFinished">
+                <div class="empty-div"></div>
+                <button type="submit" class="icon" formaction="/edit-review">
+                    <img src="/assets/icons/check-mark-svgrepo-com.svg"></button>
+                <button type="submit" class="icon" formaction="/delete-review">
+                    <img src="/assets/icons/delete-button-svgrepo-com.svg"></button>
+            </div>
+        <% } %>
+        
+        <input id="submitted-note" type="hidden" name="submittedNote" value="">
+        <input id="cancelled-note" type="hidden" name="cancelledNote" value="">
+        <input id="deleted-note" type="hidden" name="deletedNote" value="">
+        <% notes.forEach(note => { 
+            let inProgressNote = inProgressNotes.find(n => n.id == note.id);
+            let originalContainerValue = inProgressNote ? "hidden-container" : "";
+            let editContainerValue = inProgressNote ? "" : "hidden-container";
+            let inProgressDate = inProgressNote ? inProgressNote.noteDate : note.note_date.toISOString().substr(0, 10);
+            let ipNotes = inProgressNote ? inProgressNote.notes : note.notes;
+            %>
+            <input id="in-progress-note-<%=note.id%>" type="checkbox" name="inProgressNotes" value="<%=note.id%>" hidden>
+            <div id="original-note-<%=note.id%>" class="edit-container <%=originalContainerValue%>">
+                <div class="edit-notes-attributes">
+                    <p><%=note.note_date%></p>
+                    <p><%=note.notes%></p>
                 </div>
-                <input type="hidden" name="bookId" value="<%=review.bookId%>">
+                <div class="empty-div"></div>
+                <button type="button" class="icon" onclick="viewNotesForm('<%=note.id%>')">
+                    <img src="/assets/icons/pencil-edit-button-svgrepo-com.svg"></button>
+                <button type="submit" class="icon" onclick="deleteNote('<%=note.id%>')" formaction="/delete-note">
+                    <img src="/assets/icons/delete-button-svgrepo-com.svg"></button>
             </div>
-            <div class="empty-div"></div>
-            <button type="submit" class="icon" formaction="/edit-review">
-                <img src="/assets/icons/check-mark-svgrepo-com.svg"></button>
-            <button type="submit" class="icon" formaction="/delete-review">
-                <img src="/assets/icons/delete-button-svgrepo-com.svg"></button>
-        </form>
-    <% } %>
-    
-    <% notes.forEach(note => { %>
-        <div id="original-note-<%=note.id%>" class="edit-container">
-            <div class="edit-notes-attributes">
-                <p><%=note.note_date%></p>
-                <p><%=note.notes%></p>
+            <div id="edited-note-<%=note.id%>" class="edit-container <%=editContainerValue%> notes-form">
+                <div class="book-notes-container">
+                    <input type="hidden" name="id" value="<%=note.id%>">
+                    <label for="noteDate">Date:</label>
+                    <input id="note-date-<%=note.id%>" type="date" name="noteDate" value="<%=inProgressDate%>" required>
+                    <label for="notes">Notes:</label>
+                    <textarea id="notes-<%=note.id%>" name="notes" wrap="soft" rows="30"><%=ipNotes%></textarea>
+                    <button type="submit" onclick="cancelNotesForm('<%=note.id%>')" formaction="/cancel-note-progress">Cancel</button>
+                </div>
+                <div class="empty-div"></div>
+                <button type="submit" class="icon" onclick="submitForm('<%=note.id%>')" formaction="/edit-notes">
+                    <img src="/assets/icons/check-mark-svgrepo-com.svg"></button>
+                <button type="submit" class="icon" onclick="deleteNote('<%=note.id%>')" formaction="/delete-note">
+                    <img src="/assets/icons/delete-button-svgrepo-com.svg"></button>
             </div>
-            <div class="empty-div"></div>
-            <button class="icon" onclick="editNotesStart('<%=note.id%>')"><img src="/assets/icons/pencil-edit-button-svgrepo-com.svg"></button>
-            <button type="submit" class="icon" formaction="/delete-review">
-                <img src="/assets/icons/delete-button-svgrepo-com.svg"></button>
-        </div>
-        <form id="edited-note-<%=note.id%>" action="/edit-notes" class="edit-container hidden-container" method="POST">
-            <div class="book-notes-container">
-                <input type="hidden" name="id" value="<%=note.id%>">
-                <label for="noteDate">Date:</label>
-                <input type="date" name="noteDate" required>
-                <label for="notes">Notes:</label>
-                <textarea name="notes" wrap="soft" rows="30" required><%=note.notes%></textarea>
-            </div>
-            <div class="empty-div"></div>
-            <button type="submit" class="icon"><img src="/assets/icons/check-mark-svgrepo-com.svg"></button>
-            <button type="submit" class="icon" formaction="/delete-review">
-                <img src="/assets/icons/delete-button-svgrepo-com.svg"></button>
-        </form>
-    <% }); %>
-    
-    
+        <% }); %>
+    </form>
+
     <script>
+        function checkInProgressReview(finished, rating, dateFinished, bookId) {
+            document.querySelector("#original-review").classList.add("hidden-container");
+            document.querySelector("#edited-review").classList.remove("hidden-container");
+            if (finished == "yes") {
+                document.getElementById("checkbox").checked = true;
+                document.getElementById("rating-input").setAttribute("value", rating);
+                document.getElementById("date-finished-input").setAttribute("value", dateFinished);
+            } else if (finished == "no") {
+                document.getElementById("checkbox").checked = false;
+                document.getElementById("rating-label").setAttribute("hidden", true);
+                document.getElementById("rating-input").setAttribute("hidden", true);
+                document.getElementById("date-finished-label").setAttribute("hidden", true);
+                document.getElementById("date-finished-input").setAttribute("hidden", true);
+
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const finished = '<%=inProgressReview.finished%>';
+            const rating = '<%=inProgressReview.rating%>';
+            const dateFinished = '<%=inProgressReview.dateFinished%>';
+            const bookId = '<%=inProgressReview.bookId%>';
+            if (finished) {
+                checkInProgressReview(finished, rating, dateFinished, bookId);
+            }
+        });
+
+        function viewNotesForm(id) {
+            document.querySelector("#edited-note-" + id).classList.remove("hidden-container");
+            document.querySelector("#original-note-" + id).classList.add("hidden-container");
+            document.getElementById("in-progress-note-" + id).checked = true;
+        }
+
+        function submitForm(id) {
+            document.getElementById("submitted-note").setAttribute("value", id);
+            document.getElementById("in-progress-note-" + id).checked = false;
+        }
+
+        function cancelReviewForm() {
+            document.getElementById("in-progress-review").checked = false;
+        }
+
+        function cancelNotesForm(id) {
+            document.getElementById("cancelled-note").setAttribute("value", id);
+            document.getElementById("in-progress-note-" + id).checked = false;
+        }
+
+        function deleteNote(id) {
+            document.getElementById("deleted-note").setAttribute("value", id);
+        }
+
         function editReviewStart() {
             document.querySelector("#edited-review").classList.remove("hidden-container");
             document.querySelector("#original-review").classList.add("hidden-container");
             document.getElementById("checkbox").checked = true;
-        }
-
-        function editNotesStart(id) {
-            document.querySelector("#edited-note-" + id).classList.remove("hidden-container");
-            document.querySelector("#original-note-" + id).classList.add("hidden-container");
-            document.querySelector("#edited-note-" + id).classList.add("notes-form");
+            document.getElementById("in-progress-review").checked = true;
         }
 
         function toggleFinished() {
