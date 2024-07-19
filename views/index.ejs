@@ -8,6 +8,16 @@
 </head>
 <body>
     <h1>Book Notes</h1>
+    <form action="/sort-by" method="POST">
+        <label for="sorting">Sort by:</label>
+        <select name="sorting" class="drop-down">
+            <option style="display: none;"></option>
+            <option value="title">Title</option>
+            <option value="date_finished">Date Finished</option>
+            <option value="rating">Rating</option>
+        </select>
+        <button type="submit">Go</button>
+    </form>
     <div class="book-entry-container">
         <% bookData.forEach(book => { %>
             <div class="bookEntry">
@@ -21,7 +31,8 @@
                 <input type="submit" value="Add New Note" formaction="/notes">
                 <% const note = notesData.find(n => n.bookId == book.id)
                 if (note) { %>
-                    <input type="submit" value="Edit Note" formaction="/edit">
+                    <input type="submit" value="View Notes" formaction="/view">
+                    <input type="submit" value="Edit Notes" formaction="/edit">
                 <% } %>
             </form>
         <% }); %>

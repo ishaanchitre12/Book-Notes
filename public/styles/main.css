@@ -35,6 +35,10 @@ p {
     margin-bottom: 15px;
 }
 
+.drop-down {
+    margin-bottom: 20px;
+}
+
 .notes-form {
     clear: left;
 }
@@ -53,6 +57,10 @@ p {
 
 .edit-reviews-attributes {
     margin: 0px 0px;
+}
+
+.view-notes {
+    margin-bottom: 60px;
 }
 
 .icon {

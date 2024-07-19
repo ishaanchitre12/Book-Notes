@@ -68,6 +68,55 @@ app.get("/notes", (req, res) => {
     res.render("notes.ejs", {book: selectedBook, reviews: reviews});
 });
 
+app.get("/view", async (req, res) => {
+    const selectedBookId = req.query.selectedBookId;
+    const selectedBook = books.find(b => b.id == req.query.selectedBookId);
+    const selectedBookNotes = await db.query("select * from notesdata\
+        where book_id = $1", [selectedBookId]);
+    const selectedBookImageLink = books.find(b => b.id == selectedBookId).imageLink;
+    res.render("view.ejs", {
+        book: selectedBook, 
+        notes: selectedBookNotes.rows,
+        reviews: reviews,
+        cover: selectedBookImageLink
+    });
+});
+
+app.post("/sort-by", async (req, res) => {
+    let result = null;
+    const sorting = req.body.sorting;
+    if (sorting === "title") {
+        result = await db.query("select * from booksdata\
+            order by title asc");
+        books = [];
+        result.rows.forEach(book => {
+            books.push({
+                id: book.id,
+                title: book.title,
+                author: book.author,
+                description: book.description,
+                imageLink: book.imagelink
+            });
+        });
+    } else if (sorting === "date_finished" || sorting === "rating") {
+        result = await db.query("select * from reviews\
+            order by $1 asc", [sorting]);
+        books = [];
+        result.rows.forEach(async review => {
+            const book = await db.query("select * from booksdata\
+                where id = $1", [review.book_id]);
+            books.push({
+                id: book.rows[0].id,
+                title: book.rows[0].title,
+                author: book.rows[0].author,
+                description: book.rows[0].description,
+                imageLink: book.rows[0].imagelink
+            });
+        });
+    }
+    res.redirect("/");
+});
+
 let inProgressReviews = {};
 function checkInProgressReview(body) {
     inProgressReviews = {
@@ -273,7 +322,7 @@ app.post("/new-note", async (req, res) => {
             bookId: bookId
         });
     }
-    res.redirect("/");
+    res.redirect(`/view?selectedBookId=${bookId}`);
 });
 
 app.post("/add", async (req, res) => {

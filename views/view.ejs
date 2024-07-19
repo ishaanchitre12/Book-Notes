@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View</title>
+    <link rel="stylesheet" href="/styles/main.css">
+</head>
+<body>
+    <h1><%=book.title%></h1>
+    <h2>By: <%=book.author%></h2>
+    <img class="book-cover-image" src="<%=cover%>">
+    <% const review = reviews.find(r => notes[0].book_id == r.bookId); 
+    if (review) { %>
+        <div class="view-notes">
+            <p>Finished on: <%=review.dateFinished.toISOString().substr(0, 10)%></p>
+            <p>Rating: <%=review.rating%></p>
+        </div>
+    <% } %>
+    <% notes.forEach(note => { %>
+        <div class="view-notes">
+            <p><%=note.note_date%></p>
+            <p><%=note.notes%></p>
+        </div>
+    <% }) %>
+    <form action="/" method="GET">
+        <button type="submit">Return Home</button> 
+    </form>
+</body>
+</html>
