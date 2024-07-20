@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Book</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel&family=Cormorant+Garamond&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/main.css">
 </head>
 <body>
     <h1>New Book</h1>
     <form action="/add" method="POST">
         <label for="newBook">Enter the title of the book:</label>
-        <input type="text" name="newBook" required>
+        <input type="text" name="newBook" autocomplete="off" required>
         <button type="submit">Submit</button>
     </form>
 
-    <!-- Once button is clicked, function handler is called passing in id of the book  -->
-    <!-- The handler enables the create button and passes id to the value of hidden input -->
     <% if (locals.bookInfos) { %>
         <% locals.bookInfos.forEach(book => { %>
             <button id="<%=book.id%>" class="book-cover-button" onclick="handler('<%=book.id%>', '<%=book.title%>', '<%=book.author%>', '<%=book.description%>')"><img src="<%=book.imageLink%>"></button>

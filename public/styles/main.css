@@ -1,3 +1,25 @@
+body {
+    font-family: 'Cinzel', serif;
+    background-color: #1C1C1C;
+    color: #F5F5F5;
+    margin: 0;
+    padding: 20px;
+}
+
+h1, h2, h3, h4, p, label {
+    font-family: 'Cormorant Garamond', serif;
+}
+
+h1 {
+    color: #DAA520; /* Golden color */
+    border-bottom: 2px solid #8B0000; /* Dark red */
+    padding-bottom: 10px;
+}
+
+h2, h3 {
+    color: #8B0000; /* Dark red */
+}
+
 h3 {
     margin-top: 0px;
 }
@@ -6,16 +28,70 @@ p {
     margin-top: 0px;
 }
 
+form {
+    margin-top: 20px;
+}
+
 .book-entry-container {
     display: flex;
-    flex-direction: row;
     flex-wrap: wrap;
+    gap: 20px;
+}
+
+.book-entry {
+    background-color: #2E2E2E;
+    border: 1px solid #8B0000;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.book-cover-image {
+    float: left;
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin: 0px 15px 15px 0px;
+}
+
+.book-title {
+    color: #DAA520;
+}
+
+.book-author {
+    color: #F5F5F5;
+}
+
+.book-description {
+    color: #B0B0B0;
 }
 
 .book-notes-container {
     display: flex;
     flex-direction: column;
     width: 50%;
+}
+
+button, .drop-down {
+    background-color: #8B0000;
+    color: #F5F5F5;
+    border: none;
+    padding: 10px 15px;
+    font-family: 'Cinzel', serif;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover, .drop-down:hover {
+    background-color: #FF4500;
+}
+
+input[type="text"], input[type="date"], textarea, .drop-down {
+    background-color: #2E2E2E;
+    color: #F5F5F5;
+    border: 1px solid #DAA520;
+    padding: 10px;
+    font-family: 'Cormorant Garamond', serif;
+    border-radius: 5px;
 }
 
 .edit-container {
@@ -32,6 +108,9 @@ p {
 }
 
 .home-page-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
     margin-bottom: 15px;
 }
 
@@ -43,15 +122,14 @@ p {
     clear: left;
 }
 
-.book-cover-image {
-    float: left;
-    margin: 0px 15px 15px 0px;
-}
-
 .finished-attributes {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    background-color: #2E2E2E;
+    border: 1px solid #8B0000;
+    border-radius: 10px;
+    padding: 10px;
     margin: 50px 0px;
 }
 
@@ -64,12 +142,12 @@ p {
 }
 
 .icon {
-    background-color: white;
+    background-color: #1C1C1C;
     border-radius: 50%;
     border: none;
     align-self: start;
 }
 
 .icon:hover {
-    background-color: ghostwhite;
+    background-color: #2E2E2E;
 }

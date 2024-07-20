@@ -117,6 +117,27 @@ app.post("/sort-by", async (req, res) => {
     res.redirect("/");
 });
 
+app.get("/delete-book", async (req, res) => {
+    const selectedBookId = req.query.selectedBookId;
+    const bookIndex = books.findIndex(book => book.id == selectedBookId);
+    books.splice(bookIndex, 1);
+    const reviewIndex = reviews.findIndex(review => review.bookId == selectedBookId);
+    if (reviewIndex >= 0) {
+        reviews.splice(reviewIndex, 1);
+    }
+    for (let notesIndex = 0; notesIndex < notes.length; notesIndex++) {
+        if (notes[notesIndex].bookId == selectedBookId) {
+            notes.splice(notesIndex, 1);
+            notesIndex--;
+        }
+    }
+
+    await db.query("delete from booksdata where id = $1", [selectedBookId]);
+    await db.query("delete from notesdata where book_id = $1", [selectedBookId]);
+    await db.query("delete from reviews where book_id = $1", [selectedBookId]);
+    res.redirect("/");
+})
+
 let inProgressReviews = {};
 function checkInProgressReview(body) {
     inProgressReviews = {
@@ -194,7 +215,7 @@ app.post("/edit-review", async (req, res) => {
             returning id", [req.body.rating, req.body.dateFinished, req.body.bookId]);
 
         reviews[reviewsIndex] = {
-            id: result.rows.id,
+            id: result.rows[0].id,
             dateFinished: new Date(req.body.dateFinished),
             rating: req.body.rating,
             bookId: req.body.bookId
@@ -304,7 +325,7 @@ app.post("/new-note", async (req, res) => {
         values ($1, $2, $3)\
         returning id", [noteDate, newNotes, bookId]);
     notes.push({
-        id: notesResult.rows.id,
+        id: notesResult.rows[0].id,
         noteDate: noteDate,
         notes: newNotes,
         bookId: bookId
@@ -316,7 +337,7 @@ app.post("/new-note", async (req, res) => {
             values ($1, $2, $3)\
             returning id", [dateFinished, rating, bookId]);
         reviews.push({
-            id: reviewsResult.rows.id,
+            id: reviewsResult.rows[0].id,
             dateFinished: new Date(dateFinished),
             rating: rating,
             bookId: bookId
@@ -342,6 +363,7 @@ app.post("/add", async (req, res) => {
                 });
             }
         }
+        console.log(fivePossibleBooks);
         res.redirect("/new");
     } catch (err) {
         console.error("Failed to make request:", err.message);
@@ -358,9 +380,9 @@ app.post("/select", async (req, res) => {
     const result = await db.query("insert into booksdata (title, author, description, imageLink)\
         values ($1, $2, $3, $4)\
         returning id", [title, author, description, imageLink]);
-    
+    console.log(result.rows);
     books.push({
-        id: result.rows.id,
+        id: result.rows[0].id,
         title: title,
         author: author,
         description: description,

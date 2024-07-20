@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Notes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel&family=Cormorant+Garamond&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles/main.css">
 </head>
 <body>
@@ -20,7 +21,7 @@
     </form>
     <div class="book-entry-container">
         <% bookData.forEach(book => { %>
-            <div class="bookEntry">
+            <div class="book-entry">
                 <img class="book-cover-image" src="<%= book.imageLink %>">
                 <h3 class="book-title"><%= book.title %></h3>
                 <h4 class="book-author"><%= book.author %></h4>
@@ -28,12 +29,13 @@
             </div>
             <form class="home-page-buttons" method="GET">
                 <input type="hidden" name="selectedBookId" value="<%=book.id%>">
-                <input type="submit" value="Add New Note" formaction="/notes">
+                <button type="submit" formaction="/notes">Add New Note</button>
                 <% const note = notesData.find(n => n.bookId == book.id)
                 if (note) { %>
-                    <input type="submit" value="View Notes" formaction="/view">
-                    <input type="submit" value="Edit Notes" formaction="/edit">
+                    <button type="submit" formaction="/view">View Notes</button>
+                    <button type="submit" formaction="/edit">Edit Notes</button>
                 <% } %>
+                <button type="submit" formaction="/delete-book">Delete Book</button>
             </form>
         <% }); %>
     </div>
