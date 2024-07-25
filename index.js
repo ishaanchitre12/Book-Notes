@@ -2,23 +2,42 @@ import express from "express";
 import bodyParser from "body-parser";
 import axios from "axios";
 import pg from "pg";
+import bcrypt from "bcrypt";
+import passport from "passport";
+import session from "express-session";
+import env from "dotenv";
+import GoogleStrategy from "passport-google-oauth2";
+import {Strategy} from "passport-local";
 
 const app = express();
 const port = 3000;
+const saltRounds = 10;
 const GOOGLE_API_URL = "https://www.googleapis.com/books/v1/volumes";
+env.config();
+
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: true
+    })
+);
 
 const db = new pg.Client({
-    user: "postgres",
-    host: "localhost",
-    database: "books",
-    password: "B1llyButcher",
-    port: 5432,
+    user: process.env.PG_USER,
+    host: process.env.PG_HOST,
+    database: process.env.PG_DATABASE,
+    password: process.env.PG_PASSWORD,
+    port: process.env.PG_PORT,
 });
   
 db.connect();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 let books = [];
 const existingBooks = await db.query("select * from booksdata");
@@ -51,11 +70,28 @@ existingReviews.rows.forEach(review => {
         bookId: review.book_id
     });
 });
+
 app.get("/", (req, res) => {
-    console.log(books);
-    console.log(notes);
-    console.log(reviews);
-    res.render("index.ejs", {bookData: books, notesData: notes});
+    res.render("home.ejs");
+});
+
+app.get("/register", (req, res) => {
+    res.render("register.ejs");
+});
+
+app.get("/login", (req, res) => {
+    res.render("login.ejs");
+});
+
+app.get("/books", (req, res) => {
+    if (req.isAuthenticated()) {
+        console.log(books);
+        console.log(notes);
+        console.log(reviews);
+        res.render("books.ejs", {bookData: books, notesData: notes});
+    } else {
+        res.redirect("/login")
+    }
 });
 
 let fivePossibleBooks = [];
@@ -390,6 +426,84 @@ app.post("/select", async (req, res) => {
     });
 
     res.redirect("/");
+});
+
+app.post(
+    "/login",
+    passport.authenticate("local", {
+        successRedirect: "/books",
+        failureRedirect: "/login"
+    })
+);
+
+app.post("/register", async (req, res) => {
+    const email = req.body.username;
+    const password = req.body.password;
+    try {
+        const result = await db.query("select * from users where email = $1", 
+            [email]
+        );
+        if (result.rows.length > 0) {
+            res.redirect("/login");
+        } else {
+            bcrypt.hash(password, saltRounds, async (err, hash) => {
+                if (err) {
+                    console.error("Error hashing password:", err);
+                } else {
+                    const user = await db.query("insert into users (email, password)\
+                        values ($1, $2)\
+                        returning *", [email, hash]);
+                    req.login(user.rows[0], (err) => {
+                        if (err) {
+                            console.error("Error logging in user:", err);
+                        } else {
+                            res.redirect("/books");
+                        }
+                    });
+                }
+            });
+        }
+    } catch (err) {
+        console.error(err);
+    }
+});
+
+passport.use("local",
+    new Strategy(async function verify(username, password, cb) {
+        try {
+            const result = await db.query("select * from users where email = $1",
+                [username]
+            );
+            if (result.rows.length > 0) {
+                const user = result.rows[0];
+                const hashedPassword = user.password;
+                bcrypt.compare(password, hashedPassword, (err, valid) => {
+                    if (err) {
+                        console.error("Error comparing passwords:", err);
+                        return cb(err);
+                    }
+                    if (valid) {
+                        return cb(null, user);
+                    } else {
+                        return cb(null, false);
+                    }
+                });
+            } else {
+                return cb("User not found");
+            }
+
+        } catch (err) {
+            return cb(err);
+        }
+    })
+);
+
+passport.serializeUser((user, cb) => {
+    cb(null, user);
+});
+
+passport.deserializeUser((user, cb) => {
+    cb(null, user);
 });
 
 app.listen(port, () => {
