@@ -131,6 +131,16 @@ button:hover, .drop-down:hover {
     background-color: #FF4500;
 }
 
+.books-header {
+    position: relative;
+}
+
+.books-header button {
+    position: absolute;
+    bottom: 35%;
+    left: 94%;
+}
+
 input[type="text"], input[type="date"], textarea, .drop-down {
     background-color: #2E2E2E;
     color: #F5F5F5;

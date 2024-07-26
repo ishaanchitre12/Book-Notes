@@ -8,7 +8,13 @@
     <link rel="stylesheet" href="/styles/main.css">
 </head>
 <body>
-    <h1>Book Notes</h1>
+    <div class="books-header">
+        <h1>Book Notes</h1>
+        <form action="/logout" method="GET">
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+    
     <form action="/sort-by" method="POST">
         <label for="sorting">Sort by:</label>
         <select name="sorting" class="drop-down">

@@ -39,38 +39,6 @@ app.use(express.static("public"));
 app.use(passport.initialize());
 app.use(passport.session());
 
-let books = [];
-const existingBooks = await db.query("select * from booksdata");
-existingBooks.rows.forEach(book => {
-    books.push({
-        id: book.id,
-        title: book.title,
-        author: book.author,
-        description: book.description,
-        imageLink: book.imagelink
-    });
-});
-let notes = [];
-const existingNotes = await db.query("select * from notesdata");
-existingNotes.rows.forEach(note => {
-    notes.push({
-        id: note.id,
-        noteDate: note.note_date,
-        notes: note.notes,
-        bookId: note.book_id
-    });
-});
-let reviews = [];
-const existingReviews = await db.query("select * from reviews");
-existingReviews.rows.forEach(review => {
-    reviews.push({
-        id: review.id,
-        dateFinished: review.date_finished,
-        rating: review.rating,
-        bookId: review.book_id
-    });
-});
-
 app.get("/", (req, res) => {
     res.render("home.ejs");
 });
@@ -83,11 +51,57 @@ app.get("/login", (req, res) => {
     res.render("login.ejs");
 });
 
-app.get("/books", (req, res) => {
+app.get("/logout", (req, res) => {
+    req.logout(function (err) {
+        if (err) {
+            return next(err);
+        }
+        res.redirect("/");
+    });
+});
+
+let books = [];
+let notes = [];
+let reviews = [];
+app.get("/books", async (req, res) => {
     if (req.isAuthenticated()) {
-        console.log(books);
-        console.log(notes);
-        console.log(reviews);
+        books = [];
+        notes = [];
+        reviews = [];
+        const existingBooks = await db.query("select * from booksdata where user_id = $1",
+            [req.user.id]
+        );
+        existingBooks.rows.forEach(book => {
+            books.push({
+                id: book.id,
+                title: book.title,
+                author: book.author,
+                description: book.description,
+                imageLink: book.imagelink
+            });
+        });
+        const existingNotes = await db.query("select * from notesdata where user_id = $1",
+            [req.user.id]
+        );
+        existingNotes.rows.forEach(note => {
+            notes.push({
+                id: note.id,
+                noteDate: note.note_date,
+                notes: note.notes,
+                bookId: note.book_id
+            });
+        });
+        const existingReviews = await db.query("select * from reviews where user_id = $1",
+            [req.user.id]
+        );
+        existingReviews.rows.forEach(review => {
+            reviews.push({
+                id: review.id,
+                dateFinished: review.date_finished,
+                rating: review.rating,
+                bookId: review.book_id
+            });
+        });
         res.render("books.ejs", {bookData: books, notesData: notes});
     } else {
         res.redirect("/login")
@@ -123,7 +137,8 @@ app.post("/sort-by", async (req, res) => {
     const sorting = req.body.sorting;
     if (sorting === "title") {
         result = await db.query("select * from booksdata\
-            order by title asc");
+            where user_id = $1\
+            order by title asc", [req.user.id]);
         books = [];
         result.rows.forEach(book => {
             books.push({
@@ -136,7 +151,8 @@ app.post("/sort-by", async (req, res) => {
         });
     } else if (sorting === "date_finished" || sorting === "rating") {
         result = await db.query("select * from reviews\
-            order by $1 asc", [sorting]);
+            where user_id = $1\
+            order by $2 asc", [req.user.id, sorting]);
         books = [];
         result.rows.forEach(async review => {
             const book = await db.query("select * from booksdata\
@@ -150,7 +166,7 @@ app.post("/sort-by", async (req, res) => {
             });
         });
     }
-    res.redirect("/");
+    res.redirect("/books");
 });
 
 app.get("/delete-book", async (req, res) => {
@@ -171,7 +187,7 @@ app.get("/delete-book", async (req, res) => {
     await db.query("delete from booksdata where id = $1", [selectedBookId]);
     await db.query("delete from notesdata where book_id = $1", [selectedBookId]);
     await db.query("delete from reviews where book_id = $1", [selectedBookId]);
-    res.redirect("/");
+    res.redirect("/books");
 })
 
 let inProgressReviews = {};
@@ -310,7 +326,7 @@ app.post("/delete-review", async (req, res) => {
     if (remainingNotes || remainingReview) {
         return res.redirect(`/edit?selectedBookId=${req.body.bookId}`);
     } else {
-        return res.redirect("/");
+        return res.redirect("/books");
     }
 });
 
@@ -328,7 +344,7 @@ app.post("/delete-note", async (req, res) => {
     if (remainingNotes || remainingReview) {
         return res.redirect(`/edit?selectedBookId=${req.body.bookId}`);
     } else {
-        return res.redirect("/");
+        return res.redirect("/books");
     }
 });
 
@@ -357,9 +373,9 @@ app.post("/new-note", async (req, res) => {
     const noteDate = req.body.noteDate;
     const newNotes = req.body.notes;
     const bookId = req.body.id;
-    const notesResult = await db.query("insert into notesdata (note_date, notes, book_id)\
-        values ($1, $2, $3)\
-        returning id", [noteDate, newNotes, bookId]);
+    const notesResult = await db.query("insert into notesdata (note_date, notes, book_id, user_id)\
+        values ($1, $2, $3, $4)\
+        returning id", [noteDate, newNotes, bookId, req.user.id]);
     notes.push({
         id: notesResult.rows[0].id,
         noteDate: noteDate,
@@ -369,9 +385,9 @@ app.post("/new-note", async (req, res) => {
     if (req.body.finished) {
         const dateFinished = req.body.dateFinished;
         const rating = parseInt(req.body.rating);
-        const reviewsResult = await db.query("insert into reviews (date_finished, rating, book_id)\
-            values ($1, $2, $3)\
-            returning id", [dateFinished, rating, bookId]);
+        const reviewsResult = await db.query("insert into reviews (date_finished, rating, book_id, user_id)\
+            values ($1, $2, $3, $4)\
+            returning id", [dateFinished, rating, bookId, req.user.id]);
         reviews.push({
             id: reviewsResult.rows[0].id,
             dateFinished: new Date(dateFinished),
@@ -413,9 +429,9 @@ app.post("/select", async (req, res) => {
     const author = selectedBook.author;
     const description = selectedBook.description;
     const imageLink = selectedBook.imageLink;
-    const result = await db.query("insert into booksdata (title, author, description, imageLink)\
-        values ($1, $2, $3, $4)\
-        returning id", [title, author, description, imageLink]);
+    const result = await db.query("insert into booksdata (title, author, description, imageLink, user_id)\
+        values ($1, $2, $3, $4, $5)\
+        returning id", [title, author, description, imageLink, req.user.id]);
     console.log(result.rows);
     books.push({
         id: result.rows[0].id,
@@ -425,7 +441,7 @@ app.post("/select", async (req, res) => {
         imageLink: imageLink
     });
 
-    res.redirect("/");
+    res.redirect("/books");
 });
 
 app.post(
